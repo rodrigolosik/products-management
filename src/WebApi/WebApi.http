@@ -1,0 +1,14 @@
+﻿@WebApi_HostAddress = https://localhost:7170
+
+GET {{WebApi_HostAddress}}/api/products
+
+###
+
+POST {{WebApi_HostAddress}}/api/authentication
+Content-Type: application/json
+
+{
+  //User
+}
+
+###
