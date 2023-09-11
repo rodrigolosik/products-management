@@ -1,40 +1,47 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Domain.Models;
+using Infrastructure.Token;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using WebApi.Security;
+using WebApi.Models;
 
 namespace WebApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[AllowAnonymous]
 public class AuthenticationController : ControllerBase
 {
     private readonly ILogger<AuthenticationController> _logger;
-    private readonly AccessManager _accessManager;
+    private readonly IAccessManager _accessManager;
 
-    public AuthenticationController(ILogger<AuthenticationController> logger, AccessManager accessManager)
+    public AuthenticationController(ILogger<AuthenticationController> logger, IAccessManager accessManager)
     {
         _logger = logger;
         _accessManager = accessManager;
     }
 
-    [AllowAnonymous]
-    [HttpPost]
-    [ProducesResponseType(typeof(Token), (int)HttpStatusCode.OK)]
+    [HttpPost("auth")]
+    [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    public ActionResult<Token> Post([FromBody] User usuario)
+    public async Task<IActionResult> Authenticate([FromBody] Login model)
     {
-        _logger.LogInformation($"Recebida solicitação para o usuário: {usuario?.UserID}");
+        var isValid = await _accessManager.ValidateCredentials(model.Email, model.Password);
 
-        if (usuario is not null && _accessManager.ValidateCredentials(usuario))
-        {
-            _logger.LogInformation($"Sucesso na autenticação do usuário: {usuario.UserID}");
-            return _accessManager.GenerateToken(usuario);
-        }
-        else
-        {
-            _logger.LogError($"Falha na autenticação do usuário: {usuario?.UserID}");
-            return new UnauthorizedResult();
-        }
+        if (!isValid)
+            return Unauthorized("Credentials are invalid");
+
+        var token = _accessManager.GenerateJwtToken(model.Email); // Implemente esse método para gerar o token
+
+        return Ok(token);
+    }
+
+    [HttpPost("create")]
+    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    public async Task<IActionResult> Create([FromBody] User user)
+    {
+        await _accessManager.CreateUser(user);
+        return Created("", user);
     }
 }
