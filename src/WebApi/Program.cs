@@ -1,14 +1,13 @@
 using Application;
 using Infrastructure;
-using Infrastructure.Security;
 using Microsoft.OpenApi.Models;
 using WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddWebApiServices(builder.Configuration);
+builder.Services.AddInfrasctrucutreServices(builder.Configuration);
 builder.Services.AddApplicationServices();
-builder.Services.AddInfrasctrucutreServices();
+builder.Services.AddWebApiServices(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -40,12 +39,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-using var scope = app.Services.CreateScope();
-scope.ServiceProvider.GetRequiredService<IdentityInitializer>().Initialize();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
