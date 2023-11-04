@@ -5,6 +5,7 @@ namespace Infrastructure.Token;
 public interface IAccessManager
 {
     Task CreateUser(User user);
-    Task<bool> ValidateCredentials(string email, string password);
+    Task<bool> ValidateCredentialsAsync(string email, string password);
+    bool ValidateToken(string token);
     string GenerateJwtToken(string email);
 }

@@ -25,7 +25,7 @@ public sealed class AccessManager : IAccessManager
         await _userRepository.CreateAsync(user);
     }
 
-    public async Task<bool> ValidateCredentials(string email, string password)
+    public async Task<bool> ValidateCredentialsAsync(string email, string password)
     {
         var user = await _userRepository.ValidateCredentialsAsync(email, password);
 
@@ -46,5 +46,29 @@ public sealed class AccessManager : IAccessManager
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public bool ValidateToken(string token)
+    {
+        try
+        {
+            var publicKey = _tokenConfiguration.SecretJwtKey;
+
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validationToken);
+
+            var userId = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
     }
 }

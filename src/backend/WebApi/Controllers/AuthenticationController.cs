@@ -26,12 +26,12 @@ public class AuthenticationController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
     public async Task<IActionResult> Authenticate([FromBody] Login model)
     {
-        var isValid = await _accessManager.ValidateCredentials(model.Email, model.Password);
+        var isValid = await _accessManager.ValidateCredentialsAsync(model?.Email, model?.Password);
 
         if (!isValid)
             return Unauthorized("Credentials are invalid");
 
-        var token = _accessManager.GenerateJwtToken(model.Email); // Implemente esse método para gerar o token
+        var token = _accessManager.GenerateJwtToken(model.Email);
 
         return Ok(token);
     }
@@ -43,5 +43,11 @@ public class AuthenticationController : ControllerBase
     {
         await _accessManager.CreateUser(user);
         return Created("", user);
+    }
+
+    [HttpGet("validate/{token}")]
+    public IActionResult ValidateToken(string token) {
+        var isValid = _accessManager.ValidateToken(token);
+        return Ok(isValid);
     }
 }

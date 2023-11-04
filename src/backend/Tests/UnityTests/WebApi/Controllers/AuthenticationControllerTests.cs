@@ -28,7 +28,7 @@ public class AuthenticationControllerTests
 
         var loginModel = fixture.Create<Login>();
 
-        _accessManagerMock.ValidateCredentials(loginModel.Email, loginModel.Password).Returns(true);
+        _accessManagerMock.ValidateCredentialsAsync(loginModel.Email, loginModel.Password).Returns(true);
 
         _accessManagerMock.GenerateJwtToken(loginModel.Email).Returns("tokenboladao");
 
@@ -55,7 +55,7 @@ public class AuthenticationControllerTests
 
         var loginModel = fixture.Create<Login>();
 
-        _accessManagerMock.ValidateCredentials(loginModel.Email, loginModel.Password).Returns(false);
+        _accessManagerMock.ValidateCredentialsAsync(loginModel.Email, loginModel.Password).Returns(false);
 
         var authenticationController = new AuthenticationController(_loggerMock, _accessManagerMock);
 
